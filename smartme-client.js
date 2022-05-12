@@ -1,10 +1,12 @@
 const axios = require('axios');
+const dayjs = require('dayjs');
 require('dotenv').config();
 
-const username = process.env.SMARTME_USERNAME
-const password = process.env.SMARTME_PASSWORD
+const username = process.env.SMARTME_USERNAME;
+const password = process.env.SMARTME_PASSWORD;
+const interval_minutes = process.env.INTERVAL_MINUTES;
 
-async function getActivePower(username,password) {
+async function getActivePower(username, password) {
     return axios.get('https://smart-me.com/api/Devices', {
         auth: {
             username: username,
@@ -12,13 +14,15 @@ async function getActivePower(username,password) {
         }
     })
     .then(response => {
-        return response.data[0].ActivePower;
+        var activePower = response.data[0].ActivePower;
+        var now = dayjs();
+        console.log(now.format("YYYY-MM-DD h:mm:ss") + ": " + activePower + "kwh")
     })
-    .catch(function(error){
-        throw(error);
+    .catch(function (error) {
+        var now = dayjs();
+        console.log(now.format("YYYY-MM-DD h:mm:ss") + ": " + error.message); 
     });
 }
 
-getActivePower(username,password)
-.then( activePower => console.log(activePower) )
-.catch( error => { console.log("OOPS: " + error.message);  } );
+getActivePower(username, password);
+setInterval(getActivePower, 1000 * 60 * interval_minutes, username, password);
